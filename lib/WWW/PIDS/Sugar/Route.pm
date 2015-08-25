@@ -1,6 +1,6 @@
 package WWW::PIDS::Sugar::Route;
 
-use strict
+use strict;
 use warnings;
 
 sub new {

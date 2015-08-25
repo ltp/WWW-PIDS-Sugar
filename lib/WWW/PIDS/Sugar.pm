@@ -5,12 +5,11 @@ use warnings;
 
 use WWW::PIDS;
 use WWW::PIDS::Sugar::Route;
+use WWW::PIDS::Sugar::Destination;
 
 our $CACHE_ENABLED = 0;
 our $CACHE_MAX_AGE = 600;
 our $CACHE;
-
-our $METHODS = {};
 
 sub new {
 	my ( $class, %args )	= @_;
@@ -20,6 +19,14 @@ sub new {
 	$CACHE_MAX_AGE		= $args{cache_max_age} if ( $args{cache_max_age} );
 
 	return $self
+}
+
+sub get_destinations_like {
+	my ( $self, $r ) = @_;
+	$r =~ s/\/\\//g;
+	return	map { bless $_, 'WWW::PIDS::Sugar::Destination' } 
+		grep { $_->Destination =~ /$r/i } 
+		$self->get_destinations;
 }
 
 sub get_destinations {
@@ -44,20 +51,17 @@ sub __cache {
 
 sub __is_cached {
 	my $key = shift;
-print "In __is_cached\n";
+
 	if ( $CACHE_ENABLED 
 		and defined $CACHE->{ $key }
 		and defined $CACHE->{ $key }->{ val }
 		and defined $CACHE->{ $key }->{ ts }
-		#and ( ( time() - $CACHE->{ $key }->{ ts } ) > $CACHE_MAX_AGE ) 
+		and ( ( time() - $CACHE->{ $key }->{ ts } ) > $CACHE_MAX_AGE ) 
 	) {
 		my $a = ( time() - $CACHE->{ $key }->{ ts } );
-		print "a = $a\n";
-		print " Yeah\n";
 		return $CACHE->{ $key }->{ value }
 	}
 
-	print "Is cached\n";
 	return 0
 }
 
@@ -75,10 +79,11 @@ print "In __is_cached\n";
 
 # my $s = WWW::PIDS::Sugar->new;
 
-# for my $route ( $p->get_destinations ) {
+# for my $route ( $p->get_destinations( like => /foo/ ) ) {
 #	
 # }
 #
+# $p->get_stops_for_route(
 # $p->get_stops_for_route(
 #
 # $p->get_route(96)->stops
