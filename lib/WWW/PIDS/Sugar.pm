@@ -31,7 +31,7 @@ sub get_routes {
 	my $self = shift;
 
 	return __cache( 'routes' ) if __is_cached( 'routes' );
-	my @d = $self->{__p}->GetRouteSummaries();
+	my @d = map { bless $_, 'WWW::PIDS::Sugar::Route' } $self->{__p}->GetRouteSummaries();
 	__update_cache( 'routes', @d ) if $CACHE_ENABLED;
 	return @d;
 }
